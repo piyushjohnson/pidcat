@@ -61,15 +61,16 @@ if args.use_emulator:
   base_adb_command.append('-e')
 
 android_version_command = base_adb_command + ["shell", "getprop", "ro.build.version.sdk"]
-android_sdk = subprocess.Popen(android_version_command, stdout=PIPE, stderr=PIPE).communicate()[0]
+android_sdk = subprocess.Popen(android_version_command, stdout=PIPE, stderr=PIPE).communicate()[0].decode('utf8')
+
 
 if args.current_app:
   system_dump_command = base_adb_command + ["shell", "dumpsys", "activity", "activities"]
-  system_dump = subprocess.Popen(system_dump_command, stdout=PIPE, stderr=PIPE).communicate()[0]
+  system_dump = subprocess.Popen(system_dump_command, stdout=PIPE, stderr=PIPE).communicate()[0].decode('utf8')
   if int(android_sdk) >= 30:
-    running_package_name = re.search(".*Task.*A[= ][0-9]+:([^ ^}]*)", str(system_dump)).group(1)
+    running_package_name = re.search(".*Task.*A[= ][0-9]+:([^ ^}]*)", system_dump).group(1)
   else:
-    running_package_name = re.search(".*TaskRecord.*A[= ]([^ ^}]*)", str(system_dump)).group(1)
+    running_package_name = re.search(".*TaskRecord.*A[= ]([^ ^}]*)", system_dump).group(1)
   package.append(running_package_name)
 
 if len(package) == 0:
