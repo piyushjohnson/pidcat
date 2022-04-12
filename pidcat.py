@@ -60,6 +60,31 @@ if args.use_device:
 if args.use_emulator:
   base_adb_command.append('-e')
 
+devices_list_raw = subprocess.Popen(base_adb_command + ["devices"], stdout=PIPE, stderr=PIPE).communicate()[0].decode('utf8')
+
+if(devices_list_raw != ''):
+  devices_list = devices_list_raw.splitlines()[1:-1]
+  if len(devices_list) > 0:
+    if len(devices_list) >= 2:
+      for idx,device in enumerate(devices_list):
+        print(idx+1,'',device)
+
+      while True:
+        try:
+            option = int(input('Select device number (Eg. 1): ')) 
+            device_serial = devices_list[option-1].split('\t')[0]
+            break
+        except:
+            print("\nThat's not a valid option!")
+        
+      base_adb_command.extend(['-s', device_serial])
+  else: 
+    print('No connected android device found')
+    exit(0)
+else: 
+  print('No connected android device found')
+  exit(0)
+
 android_version_command = base_adb_command + ["shell", "getprop", "ro.build.version.sdk"]
 android_sdk = subprocess.Popen(android_version_command, stdout=PIPE, stderr=PIPE).communicate()[0].decode('utf8')
 
